@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Pages Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .pass { background-color: #d4edda; border-color: #c3e6cb; }
+        .fail { background-color: #f8d7da; border-color: #f5c6cb; }
+    </style>
+</head>
+<body>
+    <h1>GitHub Pages Test Suite</h1>
+    <div id="results"></div>
+    
+    <script>
+        function runTests() {
+            const results = [];
+            
+            // Test 1: Basic HTML structure
+            results.push({
+                name: "HTML Structure Test",
+                passed: document.title === "GitHub Pages Test",
+                message: "Page title loaded correctly"
+            });
+            
+            // Test 2: JavaScript execution
+            let jsWorking = false;
+            try {
+                jsWorking = typeof document !== 'undefined';
+                results.push({
+                    name: "JavaScript Execution Test",
+                    passed: jsWorking,
+                    message: "JavaScript is running"
+                });
+            } catch(e) {
+                results.push({
+                    name: "JavaScript Execution Test",
+                    passed: false,
+                    message: "JavaScript failed: " + e.message
+                });
+            }
+            
+            // Test 3: DOM manipulation
+            const testDiv = document.createElement('div');
+            testDiv.id = 'test-element';
+            document.body.appendChild(testDiv);
+            const domTest = document.getElementById('test-element') !== null;
+            results.push({
+                name: "DOM Manipulation Test",
+                passed: domTest,
+                message: "DOM elements can be created and accessed"
+            });
+            
+            // Test 4: Check if main page elements exist
+            const mainPageTest = fetch('./index.html')
+                .then(response => response.ok)
+                .then(ok => {
+                    results.push({
+                        name: "Main Page Accessibility Test",
+                        passed: ok,
+                        message: "index.html is accessible"
+                    });
+                    displayResults(results);
+                })
+                .catch(() => {
+                    results.push({
+                        name: "Main Page Accessibility Test",
+                        passed: false,
+                        message: "index.html is not accessible"
+                    });
+                    displayResults(results);
+                });
+            
+            // Display initial results
+            displayResults(results.slice(0, 3));
+        }
+        
+        function displayResults(results) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+            
+            results.forEach(result => {
+                const testDiv = document.createElement('div');
+                testDiv.className = `test ${result.passed ? 'pass' : 'fail'}`;
+                testDiv.innerHTML = `
+                    <strong>${result.name}</strong>: ${result.passed ? 'PASS' : 'FAIL'}<br>
+                    ${result.message}
+                `;
+                resultsDiv.appendChild(testDiv);
+            });
+            
+            const summary = document.createElement('div');
+            const passed = results.filter(r => r.passed).length;
+            const total = results.length;
+            summary.innerHTML = `<h2>Summary: ${passed}/${total} tests passed</h2>`;
+            resultsDiv.appendChild(summary);
+        }
+        
+        // Run tests when page loads
+        window.onload = runTests;
+    </script>
+</body>
+</html>

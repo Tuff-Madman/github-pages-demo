@@ -1,25 +1,80 @@
-name: Deploy Test
+name: GitHub Pages Deploy and Test
 
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
-  test-deployment:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+    
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: '.'
+    
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+  
+  test:
+    needs: deploy
     runs-on: ubuntu-latest
     steps:
-    - name: Check Page Availability
+    - name: Test GitHub Pages Deployment
       run: |
-        URL="https://<your-username>.github.io/github-pages-demo/"
+        URL="${{ needs.deploy.outputs.page_url || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}"
         echo "Testing deployment at $URL"
         
-        # Test if the page is accessible
-        STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+        # Wait for deployment to be ready
+        sleep 30
         
+        # Test main page
+        echo "Testing index.html..."
+        STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
         if [ "$STATUS" -eq 200 ]; then
-          echo "Page is live and accessible (HTTP status 200)"
+          echo "✅ Main page accessible (HTTP $STATUS)"
         else
-          echo "Page not accessible, HTTP status: $STATUS"
+          echo "❌ Main page failed (HTTP $STATUS)"
           exit 1
         fi
+        
+        # Test test page
+        echo "Testing test.html..."
+        TEST_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}test.html")
+        if [ "$TEST_STATUS" -eq 200 ]; then
+          echo "✅ Test page accessible (HTTP $TEST_STATUS)"
+        else
+          echo "❌ Test page failed (HTTP $TEST_STATUS)"
+          exit 1
+        fi
+        
+        # Test content
+        echo "Testing page content..."
+        CONTENT=$(curl -s "$URL")
+        if echo "$CONTENT" | grep -q "Welcome to My GitHub Page"; then
+          echo "✅ Expected content found"
+        else
+          echo "❌ Expected content not found"
+          exit 1
+        fi
+        
+        echo "🎉 All tests passed! GitHub Pages is working correctly."
