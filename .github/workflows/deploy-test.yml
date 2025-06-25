@@ -41,7 +41,8 @@ jobs:
     steps:
     - name: Test GitHub Pages Deployment
       run: |
-        URL="${{ needs.deploy.outputs.page_url || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}"
+<<<<<<< HEAD
+        URL="https://tuff-madman.github.io/github-pages-demo/"
         echo "Testing deployment at $URL"
         
         # Wait for deployment to be ready
