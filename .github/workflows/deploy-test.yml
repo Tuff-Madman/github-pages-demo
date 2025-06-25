@@ -11,7 +11,7 @@ jobs:
     steps:
     - name: Check Page Availability
       run: |
-        URL="https://<your-username>.github.io/github-pages-demo/"
+        URL="https://tuff-madman.github.io/github-pages-demo/"
         echo "Testing deployment at $URL"
         
         # Test if the page is accessible
