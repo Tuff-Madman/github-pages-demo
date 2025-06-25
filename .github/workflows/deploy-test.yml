@@ -1,0 +1,25 @@
+name: Deploy Test
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  test-deployment:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check Page Availability
+      run: |
+        URL="https://<username>.github.io/<repository-name>/"
+        echo "Testing deployment at $URL"
+        
+        # Test if the page is accessible
+        STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+        
+        if [ "$STATUS" -eq 200 ]; then
+          echo "Page is live and accessible (HTTP status 200)"
+        else
+          echo "Page not accessible, HTTP status: $STATUS"
+          exit 1
+        fi
