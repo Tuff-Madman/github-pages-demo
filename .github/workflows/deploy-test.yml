@@ -19,6 +19,9 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -41,8 +44,7 @@ jobs:
     steps:
     - name: Test GitHub Pages Deployment
       run: |
-<<<<<<< HEAD
-        URL="https://tuff-madman.github.io/github-pages-demo/"
+        URL="${{ needs.deploy.outputs.page_url }}"
         echo "Testing deployment at $URL"
         
         # Wait for deployment to be ready
